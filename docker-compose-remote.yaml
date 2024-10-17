@@ -1,0 +1,32 @@
+version: '2'
+services:
+  otomato-proxy:
+    build:
+      context: ./envoy
+      dockerfile: Dockerfile.proxy
+    volumes:
+      - ./envoy/envoy-remote.yaml:/etc/envoy.yaml
+    networks:
+      - envoymesh
+    expose:
+      - "80"
+      - "8001"
+    ports:
+      - "18000:80"
+      - "18001:8001"
+
+  web-service:
+    image: otomato/http-echo
+    command:
+      - '-text="Welcome to WASM land"'
+    networks:
+      envoymesh:
+        aliases:
+          - web-service
+    expose:
+      - "5678"
+    ports:
+      - "18080:5678"
+
+networks:
+  envoymesh: {}
