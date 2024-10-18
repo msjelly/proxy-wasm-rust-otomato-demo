@@ -33,8 +33,17 @@ static_resources:
                         vm_id: vm.sentinel.prime_auth
                         runtime: envoy.wasm.runtime.v8
                         code:
-                          local:
-                            filename: /etc/myenvoyfilter.wasm
+                          remote:
+                            http_uri: 
+                              uri: https://janledptest1.blob.core.windows.net/wasm/gateway.wasm?se=2024-10-23T21%3A04%3A56Z&sp=r&sv=2022-11-02&sr=b&skoid=6eb4ebcd-5efe-45b0-b38d-85e30aa9ab0a&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2024-10-16T21%3A06%3A07Z&ske=2024-10-23T21%3A04%3A56Z&sks=b&skv=2022-11-02&sig=fe8SDVYxvDNP4edKjko6HIj73hzR5E6nUCSxQ1AhdzA%3D
+                              timeout: 10s
+                              cluster: wasm_file_server
+                            sha256: 7a2e642246738bb4f5b9687de95ae7908d49ef780f65d64279f9afe129b0b9cb
+                            retry_policy:
+                              retry_back_off:
+                                base_interval: 0.25s
+                                max_interval: 60s
+                              num_retries: 3
                         allow_precompiled: true
                 - name: envoy.filters.http.router
                   typed_config:
@@ -53,7 +62,25 @@ static_resources:
                 socket_address:
                   address: echo-service
                   port_value: 5678
-            
+    - name: wasm_file_server
+      connect_timeout: 0.25s
+      type: STRICT_DNS
+      lb_policy: round_robin
+      load_assignment:
+        cluster_name: wasm_file_server
+        endpoints:
+        - lb_endpoints:
+          - endpoint:
+              address:
+                socket_address:
+                  address: janledptest1.blob.core.windows.net
+                  port_value: 443
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          sni: janledptest1.blob.core.windows.net
+           
 admin:
   access_log_path: "/dev/null"
   address:

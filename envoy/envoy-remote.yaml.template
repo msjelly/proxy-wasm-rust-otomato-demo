@@ -21,7 +21,7 @@ static_resources:
                       - match:
                           prefix: "/"
                         route:
-                          cluster: web_service
+                          cluster: echo_service
               http_filters:
                 - name: envoy.filters.http.wasm
                   typed_config:
@@ -49,18 +49,18 @@ static_resources:
                   typed_config:
                     "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
   clusters:
-    - name: web_service
+    - name: echo_service
       connect_timeout: 0.25s
       type: STRICT_DNS
       lb_policy: round_robin
       load_assignment:
-        cluster_name: web_service
+        cluster_name: echo_service
         endpoints:
         - lb_endpoints:
           - endpoint:
               address:
                 socket_address:
-                  address: web-service
+                  address: echo-service
                   port_value: 5678
     - name: wasm_file_server
       connect_timeout: 0.25s

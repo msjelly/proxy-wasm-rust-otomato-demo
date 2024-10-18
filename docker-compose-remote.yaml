@@ -1,4 +1,3 @@
-version: '2'
 services:
   otomato-proxy:
     build:
@@ -15,14 +14,14 @@ services:
       - "18000:80"
       - "18001:8001"
 
-  web-service:
+  echo-service:
     image: otomato/http-echo
     command:
       - '-text="Welcome to WASM land"'
     networks:
       envoymesh:
         aliases:
-          - web-service
+          - echo-service
     expose:
       - "5678"
     ports:
